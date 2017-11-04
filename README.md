@@ -5,7 +5,7 @@ Mute/Unmute users in HipChat channels via client-side DOM manipulation
 ```bash
 sudo python hipchat\ mute.py
 
-*Note:* sudo is necessary since we're modifying a file in HipChat.app (chat.html)
+Note: sudo is necessary since we're modifying a file in HipChat.app (chat.html)
 ```
 
 # Comment
