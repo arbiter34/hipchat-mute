@@ -1,0 +1,284 @@
+<!DOCTYPE html><html id="hc" class="${browserType} ${windowStyle}"><head>
+<meta charset="utf-8"/>
+<title>HackedChat</title>
+<style>
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 33%; 
+}
+
+/* The Close Button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+.flex-container, .flex-container-item {
+	display: flex;
+	flex-direction: column;
+}
+
+.flex-container-item:first-child {
+	border-width: 0 0 1px 0;
+	border-color: #D3D3D3;
+}
+
+.flex-container-item {
+	border-width: 0 0 0 0;
+	border-style: solid;
+}
+
+.flex-row, .flex-row-head, .flex-row-foot {
+	display: flex;
+	flex-direction: row;
+	padding: .5em;
+	margin: 0 -5px;
+}
+
+.flex-row-head {
+	border-width: 0 0 1px 0;
+	border-style: solid;
+}
+
+.flex-row-foot {
+	border-width: 1px 0 0 0;
+	border-style: solid;
+}
+
+.flex-item {
+	flex: auto;
+}
+
+.flex-col, .flex-col-1, .flex-col-2, .flex-col-3, .flex-col-4, .flex-col-5, .flex-col-6, .flex-col-7, .flex-col-8, .flex-col-9, .flex-col-10, .flex-col-11, .flex-col-12 {
+	margin: 0 5px;
+}
+
+.flex-col-1 {
+	flex-basis: 8.33%;
+}
+
+.flex-col-2 {
+	flex-basis: 16.66%;
+}
+
+.flex-col-3 {
+	flex-basis: 25%;
+}
+
+.flex-col-4 {
+	flex-basis: 33.33%;
+}
+
+.flex-col-5 {
+	flex-basis: 41.66%;
+}
+
+.flex-col-6 {
+	flex-basis: 50%;
+}
+
+.flex-col-7 {
+	flex-basis: 58.33%;
+}
+
+.flex-col-8 {
+	flex-basis: 66.66%;
+}
+
+.flex-col-9 {
+	flex-basis: 75%;
+}
+
+.flex-col-10 {
+	flex-basis: 83.33%;
+}
+
+.flex-col-11 {
+	flex-basis: 91.66%;
+}
+
+.flex-col-12 {
+	flex-basis: 100%;
+}
+
+.flex-hover:hover {
+	background-color: rgba(236, 247, 249, 0.5);
+}
+</style>
+<div id="muted_modal" class="modal">
+  <div class="modal-content flex-container">
+  	<div class="flex-container-item">
+  		<div class="flex-row">
+	  		<div class="flex-col-6">
+	  			<h3></h3>
+	  		</div>
+	  		<div class="flex-col-6">
+	    		<span class="close">&times;</span>
+	  		</div>
+	  	</div>
+  	</div>
+    <div style="padding-bottom: 10px">&nbsp;</div>
+  </div>
+</div>
+<script>
+	var ignores = [];
+	var currentUser = "";
+	var waitForStartInterval;
+
+	var getRoomHeader = function() {
+		if ($(document).find('.hc-groupchat-header h3').length > 0) {
+			return $(document).find('.hc-groupchat-header h3');
+		}
+		if ($(document).find('.hc-page-header-main h3').length > 0) {
+			return $(document).find('.hc-page-header-main h3');
+		}
+	}
+
+	var getCleanRoomName = function() {
+		return getRoomHeader().text().replace(/\s?Edit\sMuted/, '').trim();
+	}
+
+	var unmute = function(mention, room) {
+		for (var i = 0, length = ignores.length; i < length; i++) {
+			var item = ignores[i];
+			if (item.mention == mention && item.room == room) {
+				ignores.splice(i, 1);
+				break;
+			}
+		}
+		$(document).find('span[class="sender-name"][aria-label="'+mention+'"]').closest('.hc-chat-row').show();
+	}
+
+	var addMute = function() {
+		$(document).find('.sender-name').each(function() {
+			if ($(this).parent().find('.mute-link').length == 0 && $(this).attr('aria-label') != currentUser) { 
+				$(this).parent().find('.hc-chat-status-time').append($('<a />', {href: '#', class:'mute-link'}).text(' mute'));
+				$(this).parent().find('.mute-link').click(function(e) {
+					e.preventDefault();
+					var mention = $(this).closest('.hc-chat-msg').find('.sender-name').attr('aria-label');
+					var room = getCleanRoomName();
+					if (!isIgnored(mention, room)) {
+						ignores.push({mention: mention, room: room});
+					}
+				});
+			}
+		});
+		var $roomHeader = getRoomHeader();
+		if ($roomHeader.find('.muted_btn').length == 0) {
+			$modal = $('#muted_modal');
+
+			if ($('body').find('.muted_modal').length == 0) {
+				// Move modal to body(2nd for reasons) from head so we can see it
+				$($('body').last()).append($modal);
+			}
+
+			$roomHeader.append($('#new_chat_btn').clone()
+												 .removeAttr('aria-label')
+												 .removeAttr('data-reactid')
+												 .removeAttr('tipsify-ignore')
+												 .removeAttr('id')
+												 .text('Edit Muted')
+												 .addClass('muted_btn')
+												 .css('margin-left', '10px'));
+
+			$('body').find('.muted_btn').click(function(e) {
+				e.preventDefault();
+
+				$modal.css('display', 'block');
+				$modal.find('.modal-content.flex-container > .flex-container-item > .flex-row > .flex-col-6 h3')
+					  .text('Muted Users for '+ getCleanRoomName());
+
+				$(ignores).each(function() {
+					if (this.room == getCleanRoomName()) {
+						var modalContent = $modal.find('.modal-content');
+						var rowContainer = $('<div />', {class: 'flex-container-item'});
+						var row = $('<div />', {class: 'flex-row'});
+						var nameDiv = $('<div />', {class: 'flex-col-6'}).append($('<p/>').text(this.mention));
+						var unmuteDiv = $('<div />', {class: 'flex-col-6'}).append($('<a/>')
+																		   .attr('data-mention', this.mention)
+																		   .text('Unmute')
+																		   .click(function(e) {
+																			 	e.preventDefault();
+																			 	$(this).closest('.flex-container-item').remove();
+																			 	unmute($(this).attr('data-mention'), getCleanRoomName());
+																			}));
+						row.append(nameDiv);
+						row.append(unmuteDiv);
+						rowContainer.append(row);
+						modalContent.append(rowContainer);
+					}
+				});
+
+				$modal.find('.close').click(function(e) {
+					$modal.find('.modal-content.flex-container > .flex-container-item:not(:first)').remove();
+					$modal.css('display', 'none');
+				});
+			});
+		}
+	};
+
+	var mute = function() {
+		$(ignores).each(function() {
+			if (this.room == getCleanRoomName()) {
+				$(document).find('span[class="sender-name"][aria-label="'+this.mention+'"]').parent().parent().hide();
+			}
+		});
+	};
+
+	var isIgnored = function(mention, room) {
+		for (var i = 0, length = ignores.length; i < length; i++) {
+			var item = ignores[i];
+			if (item.mention == mention && room == room) {
+				return true;
+			}
+		}
+	}
+
+	var waitForStart = function() {
+		if ($(document).find('.sender-name').length == 0) {
+			return;
+		}
+		clearInterval(waitForStartInterval);		
+		$.ajax({
+			url: 'https://sofiinc.hipchat.com/account',
+			success: function(result) {
+				currentUser = '@' + $($.parseHTML(result)).find('#mention_name').val();
+				if (currentUser) {
+					waitForStartInterval = setInterval(addMute, 100);
+					waitForStartInterval = setInterval(mute, 100);
+				}
+			}
+		});	
+	}
+
+	window.my_init = function() {
+		waitForStartInterval = setInterval(waitForStart, 100);
+	};
+	//# sourceURL=dynamicScript.js
+</script>
