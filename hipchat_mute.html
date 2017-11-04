@@ -178,7 +178,10 @@
 	var addMute = function() {
 		$(document).find('.sender-name').each(function() {
 			if ($(this).parent().find('.mute-link').length == 0 && $(this).attr('aria-label') != currentUser) { 
-				$(this).parent().find('.hc-chat-status-time').append($('<a />', {href: '#', class:'mute-link'}).text(' mute'));
+				$(this).parent().find('.hc-chat-status-time')
+								.append($('<a />', {href: '#', class:'mute-link'})
+													.text(' mute')
+													.attr('aria-label', 'Quiet Time....'));
 				$(this).parent().find('.mute-link').click(function(e) {
 					e.preventDefault();
 					var mention = $(this).closest('.hc-chat-msg').find('.sender-name').attr('aria-label');
