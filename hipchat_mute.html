@@ -166,6 +166,7 @@
 			var item = ignores[i];
 			if (item.mention == mention && item.room == room) {
 				ignores.splice(i, 1);
+				window.localStorage.setItem("ignores", JSON.stringify(ignores));
 				break;
 			}
 		}
@@ -185,6 +186,7 @@
 					var room = getCleanRoomName();
 					if (!isIgnored(mention, room)) {
 						ignores.push({mention: mention, room: room});
+						window.localStorage.setItem("ignores", JSON.stringify(ignores));
 					}
 				});
 			}
@@ -264,7 +266,11 @@
 		if ($(document).find('.sender-name').length == 0) {
 			return;
 		}
-		clearInterval(waitForStartInterval);		
+		clearInterval(waitForStartInterval);
+		var temp = window.localStorage.getItem("ignores");
+		if (temp) {
+			ignores = JSON.parse(temp);
+		}		
 		$.ajax({
 			url: 'https://sofiinc.hipchat.com/account',
 			success: function(result) {
