@@ -1,8 +1,5 @@
-<!DOCTYPE html><html id="hc" class="${browserType} ${windowStyle}"><head>
-<meta charset="utf-8"/>
 <title>HackedChat</title>
 <style>
-/* The Modal (background) */
 .modal {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
@@ -257,7 +254,7 @@
 	var isIgnored = function(mention, room) {
 		for (var i = 0, length = ignores.length; i < length; i++) {
 			var item = ignores[i];
-			if (item.mention == mention && room == room) {
+			if (item.mention == mention && item.room == room) {
 				return true;
 			}
 		}

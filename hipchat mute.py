@@ -13,10 +13,11 @@ with open(muteFilePath, 'r') as file:
 if "macstate.webCoreStarted = true;\n\t\twindow.my_init();" not in hipChatFileData:
 	hipChatFileData = hipChatFileData.replace("macstate.webCoreStarted = true;", "macstate.webCoreStarted = true;\n\t\twindow.my_init();");
 
+# Worlds ugliest regex upcoming
 if origTitle in hipChatFileData:
 	hipChatFileData = hipChatFileData.replace('<title>HipChat</title>', muteFileData)
 else:
-	hipChatFileData = re.sub(r'<title>HackedChat</title>.*?<script>.*?</script>', muteFileData, hipChatFileData)
+	hipChatFileData = re.sub(r'<title>HackedChat</title>.*?\s+<style>(\s+.*?)+</style>(\s+.*?)+<script>(\s+.*?)+</script>', muteFileData, hipChatFileData)
 
 with open(hipChatFilePath, 'w') as file:
 	file.write(hipChatFileData)
