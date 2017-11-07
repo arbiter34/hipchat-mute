@@ -170,7 +170,14 @@
 				break;
 			}
 		}
-		$(document).find('span[class="sender-name"][aria-label="'+mention+'"]').closest('.hc-chat-row').show();
+		$(document).find('span[class="sender-name"][aria-label="'+mention+'"]')
+					.closest('.hc-chat-row')
+					.each(function() {
+						$(this).show();
+						if ($(this).next().find('span[class="sender-name"][aria-label="Image"]').length > 0) {
+							$(this).next().show();
+						}
+					});
 	}
 
 	var addMute = function() {
@@ -248,7 +255,14 @@
 	var mute = function() {
 		$(ignores).each(function() {
 			if (this.room == getCleanRoomName()) {
-				$(document).find('span[class="sender-name"][aria-label="'+this.mention+'"]').parent().parent().hide();
+				$(document).find('span[class="sender-name"][aria-label="'+this.mention+'"]')
+						   .closest('.hc-chat-row')
+						   .each(function() {
+						   	$(this).hide();
+						   	if ($(this).next().find('span[class="sender-name"][aria-label="Image"]').length > 0) {
+						   		$(this).next().hide();
+						   	}
+						   });
 			}
 		});
 	};
